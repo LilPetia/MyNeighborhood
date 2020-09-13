@@ -60,13 +60,57 @@ const map = new ol.Map({
     })
 })
 
-map.on('click', function(e){
-    console.log(e)
-})
+function reverseGeocode(coords) {
+  fetch('http://nominatim.openstreetmap.org/reverse?format=json&lon=' + coords[0] + '&lat=' + coords[1])
+    .then(function(response) {
+           return response.json();
+       }).then(function(json) {
+           console.log(json.display_name);
+       });
+}
+ 
+let dt = {"type":"FeatureCollection","features":[{"type":"Feature","properties":{"adress":" г. Долгопрудный, ул. Первомайская, д. 30, к. 7.","description":"best place"},"geometry":{"type":"Point","coordinates":[37.52285957336426,55.92891362076248]}}]};
+map.on('click', function (evt) {
+  var coord = ol.proj.toLonLat(evt.coordinate);
+  reverseGeocode(coord);
+
+
+  //console.log(dt['features'][0].geometry.coordinates);
+  dt['features'][0].geometry.coordinates = coord;
+  //console.log(dt['features'][0].geometry.coordinates );
+
+  var features = ol.format.readFeatures(dt['features'])
+  var source = new ol.source.Vector({
+    format: new ol.format.GeoJSON(),
+    features: features
+    
+    
+  });
+  var place = new ol.layer.VectorImage({
+    source: source,
+    features: features,
+    style: new ol.style.Style({
+        fill: fillStyle,
+        stroke: strokeStyle,
+        image: circleStyle
+    })
+  });
+
+
+
+
+
+
+
+  
+  map.addLayer(place);
+}
+
+)
+
 
 
   
   
-//map.addLayer(place);
 
 
